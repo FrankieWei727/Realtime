@@ -1,5 +1,6 @@
-# Realtime
-gtfs project
+# Realtime gtfs project
+
+## Guide
 
 [Troubleshooting](https://opendata.transport.nsw.gov.au/troubleshooting)  
 
@@ -9,8 +10,8 @@ gtfs project
 
 [How to Use Open Data to Develop an Application](https://opendata.transport.nsw.gov.au/how-use-open-data-develop-application)   
 
+## gtfs API     
 
-gtfs API:     
 [Public Transport - Timetables - For Realtime : ](https://opendata.transport.nsw.gov.au/node/332/exploreapi)  
 Static timetables, stop locations, and route shape information in GTFS format for operators that support realtime.  
 Public URI: https://api.transport.nsw.gov.au/v1/gtfs/schedule/   
