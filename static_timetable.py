@@ -1,27 +1,28 @@
+import glob
 import requests
-import csv
 from io import BytesIO
 from zipfile import ZipFile
-from pathlib import Path
+import pandas as pd
+import os
 
 
-def timetable():
+def timetable(api, model):
 
-    response_time = requests.get('https://api.transport.nsw.gov.au/v1/gtfs/schedule/sydneytrains',
-                            headers={'Authorization': 'apikey EXmt0Pl6OWxy2OZUo19fus2PYKsMd4F6G7W8'})
+    dir_name = "/Users/frankie/Realtime/Data/timetable/"
 
+    response_time = requests.get('https://api.transport.nsw.gov.au/v1/gtfs/schedule/' + model,
+                                 headers={'Authorization': api})
 
     f = ZipFile(BytesIO(response_time.content))
-    f.extractall(path='Data/Timetable/')
+    f.extractall(path=dir_name)
 
-    for in_path in Path('Data/Timetable/').glob('*.txt'):
-        out_path = in_path.with_suffix('.csv')
-        with in_path.open('r') as fin, out_path.open('w') as fout:
-            reader = csv.DictReader(fin)
-            writer = csv.DictWriter(fout, reader.fieldnames)
-            writer.writeheader()
-            writer.writerows(reader)
+    all_files = glob.glob(dir_name + "/*.txt")
 
+    # convert txt files to csv files and delete all of them
+    for file in all_files:
+        df = pd.read_csv(file)
+        filename = file.split(".")[0]
+        df.to_csv(filename + '.csv', index=False)
 
-if __name__ == '__main__':
-    timetable()
+        if file.endswith(".txt"):
+            os.remove(os.path.join(dir_name, file))
