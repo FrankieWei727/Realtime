@@ -3,11 +3,9 @@ from google.protobuf import json_format
 import requests
 from protobuf_to_dict import protobuf_to_dict
 import pandas as pd
-from nested_lookup import nested_lookup
-from nested_lookup import get_all_keys
-from nested_lookup import get_occurrence_of_key, get_occurrence_of_value
 import json
 from protobuf import tfnsw_gtfs_realtime_pb2
+from data_process import Trip_update_data as data_pro
 
 
 def trip_update(api, model):
@@ -25,7 +23,6 @@ def trip_update(api, model):
     with open(dir_name + 'trip_update.json', 'w') as json_file:
         json.dump(df, json_file)
 
-    # for entity in message:
-    #     if entity.HasField('trip_update'):
-    #         print(entity)
+    data_pro.json_to_csv()
+
 

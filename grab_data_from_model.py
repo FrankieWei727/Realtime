@@ -1,9 +1,6 @@
 from os import path
 
-import trip_update
-import static_timetable
-import alert
-import vehicle_position
+from get_data import static_timetable, trip_update, vehicle_position, alert
 import logging.config
 import argparse
 
