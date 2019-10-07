@@ -22,7 +22,7 @@ def trip_update(api, model):
     message = json_format.MessageToJson(feed)
 
     df = json.loads(message)
-    with open(dir_name + 'trip_update_.json', 'w') as json_file:
+    with open(dir_name + 'trip_update.json', 'w') as json_file:
         json.dump(df, json_file)
 
     # for entity in message:

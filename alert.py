@@ -19,7 +19,3 @@ def alert(api_key, model):
     with open(dir_name + 'alert.json', 'w') as json_file:
         json.dump(df, json_file)
 
-    # for entity in feed.entity:
-    #     if entity.HasField('alert'):
-    #         print(entity)
-
