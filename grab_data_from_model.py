@@ -4,7 +4,6 @@ import trip_update
 import static_timetable
 import alert
 import vehicle_position
-import logging
 import logging.config
 import argparse
 
@@ -26,26 +25,21 @@ def set_parser():
 
 if __name__ == '__main__':
 
-    # create a log object
-    # logging.basicConfig(filename='gtfs_events.log',
-    #                     level=logging.DEBUG,
-    #                     format='%(asctime)s - %(levelname)s - %(message)s',
-    #                     datefmt='%m/%d/%Y %I:%M:%S %p')
+    api_key = open("/Users/frankie/Realtime/apikey.txt","r").read().split('.')[0]
+    model = 'sydneytrains'
 
+    # create logger
     log_path = "log/logging.conf"
     log_file_path = path.join(path.dirname(path.abspath(__file__)), log_path)
     logging.config.fileConfig(log_file_path)
-
-    # create logger
     logger = logging.getLogger('gtfs_events')
 
-    api_key = 'apikey EXmt0Pl6OWxy2OZUo19fus2PYKsMd4F6G7W8'
-    model = 'sydneytrains'
-
-    # set_parser()
+    if api_key is None:
+        api_key = input("Please input your api_key: ")
 
     logger.info("Start running project")
-    option = input("Please select: 1.tripUpdate 2.timetable 3.alert 4. vehicle position 5.exit : \n")
+    print(model)
+    option = input("Please select: 1.tripUpdate 2.timetable 3.alert 4.vehicle position 5.exit : \n")
 
     if option == "1":
         logger.info(model + ": grab trip update info")
