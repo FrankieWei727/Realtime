@@ -62,3 +62,10 @@ GET /lightrail
 GET /nswtrains   
 
 
+## Static timetable relationship
+
+
+
+
+
+
