@@ -1,10 +1,8 @@
 from os import path
-
-from getData import vehicle_position
-from dataProcess import static_timetable, trip_update, alert
+import os
+from dataProcess import static_timetable, trip_update, alert, vehicle_position
 import logging.config
 import argparse
-import os
 
 
 def set_parser():
@@ -55,7 +53,7 @@ if __name__ == '__main__':
 
     if option == "4":
         logger.info(model + ": grab vehicle position info")
-        vehicle_position.vehcile_position(api_key, model)
+        vehicle_position.vehicle_position(api_key, model)
 
     if option == "5":
         print('Closing. . .')

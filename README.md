@@ -64,7 +64,7 @@ GET /nswtrains
 
 ## Real-time timetable relationship
 The following picture shows the relationship between each file in real-time timetable model:
-![image](getData/gtfs_file_relationship.jpeg)
+![image](dataProcess/gtfs_file_relationship.jpeg)
 
 
 
