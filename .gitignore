@@ -1,5 +1,7 @@
 # Project exclude paths
 /venv/
 __pycache__
+log
 *.csv
 *.json
+apikey.txt
