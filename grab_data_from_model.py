@@ -1,8 +1,10 @@
 from os import path
 
-from get_data import static_timetable, trip_update, vehicle_position, alert
+from getData import vehicle_position
+from dataProcess import static_timetable, trip_update, alert
 import logging.config
 import argparse
+import os
 
 
 def set_parser():
@@ -22,7 +24,8 @@ def set_parser():
 
 if __name__ == '__main__':
 
-    api_key = open("/Users/frankie/Realtime/apikey.txt","r").read().split('.')[0]
+    os.chdir(os.path.dirname(__file__))
+    api_key = open("/Users/frankie/Realtime/apikey.txt", "r").read().split('.')[0]
     model = 'sydneytrains'
 
     # create logger
