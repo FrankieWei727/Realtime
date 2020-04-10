@@ -5,13 +5,12 @@ import numpy as np
 from datetime import date
 
 
-def json_to_csv():
+def trip_update_date_processing(df):
     print('trip update data processing.')
+
+    data = df
     os.chdir(os.path.dirname(__file__))
     dir_name = os.getcwd() + '/tripUpdate/'
-
-    with open(dir_name + "trip_update.json", "r") as read_file:
-        data = json.load(read_file)
 
     entities = data['entity']
     entity_id = []

@@ -6,10 +6,15 @@ from datetime import date
 file_date = date.today().strftime("%Y%m%d")
 
 
-def vehicle_position_data_processing():
+def vehicle_position_data_processing(df):
     print('vehicle position data processing')
-    with open("vehicle_position.json", "r") as read_file:
-        data = json.load(read_file)
+    # with open("vehicle_position.json", "r") as read_file:
+    #     data = json.load(read_file)
+
+    os.chdir(os.path.dirname(__file__))
+    dir_name = os.getcwd() + '/vehiclePosition/'
+
+    data = df
 
     vehicle = []
     tripId = []
@@ -77,7 +82,7 @@ def vehicle_position_data_processing():
     df.timestamp = df.timestamp + pd.Timedelta('10:00:00')
     df.timestamp = df.timestamp.dt.strftime('%Y%m%d %H:%M:%S')
 
-    hdr = False if os.path.isfile('vehicle_position_' + file_date + '.csv') else True
-    df.to_csv('vehicle_position_' + file_date + '.csv', mode='a', header=hdr, index=False)
+    hdr = False if os.path.isfile(dir_name + 'vehicle_position_' + file_date + '.csv') else True
+    df.to_csv(dir_name + 'vehicle_position_' + file_date + '.csv', mode='a', header=hdr, index=False)
 
     print('finish vehicle position data processing')

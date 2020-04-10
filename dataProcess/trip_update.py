@@ -3,7 +3,7 @@ import requests
 import json
 import os
 from protobuf import tfnsw_gtfs_realtime_pb2
-from dataProcess import trip_update_data_clean as data_pro
+from dataProcess import trip_update_data_clean as data_clean
 
 
 def trip_update(api, model):
@@ -24,4 +24,4 @@ def trip_update(api, model):
 
     print('finish getting trip update data.')
 
-    data_pro.json_to_csv()
+    data_clean.trip_update_date_processing(df)

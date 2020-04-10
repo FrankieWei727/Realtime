@@ -4,7 +4,7 @@ from io import BytesIO
 from zipfile import ZipFile
 import pandas as pd
 import os
-from dataProcess import timetable_data_clean
+from dataProcess import timetable_data_clean as data_clean
 
 
 def timetable(api, model):
@@ -31,4 +31,4 @@ def timetable(api, model):
 
     print('finish getting timetable data.')
 
-    timetable_data_clean.timetable_data_processing()
+    data_clean.timetable_data_processing()

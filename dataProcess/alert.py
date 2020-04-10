@@ -3,7 +3,7 @@ from protobuf import tfnsw_gtfs_realtime_pb2
 from google.protobuf import json_format
 import json
 import os
-from dataProcess import alert_data_clean
+from dataProcess import alert_data_clean as data_clean
 
 
 def alert(api_key, model):
@@ -23,4 +23,5 @@ def alert(api_key, model):
         json.dump(df, json_file)
 
     print('finish getting alter data.')
-    alert_data_clean.alert_data_processing()
+
+    data_clean.alert_data_processing(df)

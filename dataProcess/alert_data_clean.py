@@ -6,13 +6,12 @@ from datetime import date
 file_date = date.today().strftime("%Y%m%d")
 
 
-def alert_data_processing():
+def alert_data_processing(df):
     print('alter data processing.')
+
+    data = df
     os.chdir(os.path.dirname(__file__))
     dir_name = os.getcwd() + '/alert/'
-
-    with open(dir_name + "alert.json", "r") as read_file:
-        data = json.load(read_file)
 
     entities = data['entity']
     line_service_alerts = []
@@ -59,7 +58,8 @@ def alert_data_processing():
             station_facilities_alerts_cause.append(entity['alert']['cause'])
             station_facilities_alerts_effect.append(entity['alert']['effect'])
             station_facilities_alerts_headerText.append(entity['alert']['headerText']['translation'][0]['text'])
-            station_facilities_alerts_descriptionText.append(entity['alert']['descriptionText']['translation'][0]['text'])
+            station_facilities_alerts_descriptionText.append(
+                entity['alert']['descriptionText']['translation'][0]['text'])
 
         df_station = pd.DataFrame(columns=['agencyId',
                                            'stopId',

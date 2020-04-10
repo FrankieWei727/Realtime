@@ -6,6 +6,7 @@ import os
 def timetable_data_processing():
     print('timetable data processing')
 
+
     os.chdir(os.path.dirname(__file__))
     dir_name = os.getcwd() + '/timetable/'
 
