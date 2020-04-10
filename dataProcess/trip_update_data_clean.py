@@ -219,5 +219,4 @@ def json_to_csv():
     hdr = False if os.path.isfile(dir_name + 'trip_update_' + file_date + '.csv') else True
     df.to_csv(dir_name + 'trip_update_' + file_date + '.csv', mode='a', header=hdr, index=False)
 
-
     print('finish trip update data processing.')
