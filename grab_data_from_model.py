@@ -25,7 +25,7 @@ def set_parser():
 if __name__ == '__main__':
 
     os.chdir(os.path.dirname(__file__))
-    api_key = open("/Users/frankie/Realtime/apikey.txt", "r").read().split('.')[0]
+    api_key = open("apikey.txt", "r").read().split('.')[0]
     model = 'sydneytrains'
 
     # create logger
