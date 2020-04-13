@@ -1,8 +1,8 @@
+import os
+import json
 import requests
 from protobuf import tfnsw_gtfs_realtime_pb2
 from google.protobuf import json_format
-import json
-import os
 from dataProcess import alert_data_clean as data_clean
 
 

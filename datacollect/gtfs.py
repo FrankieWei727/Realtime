@@ -1,7 +1,6 @@
-
 # gtfs.py: load TfNSW gtfs-realtime data to a database
 
-#from google.transit import gtfs_realtime_pb2
+# from google.transit import gtfs_realtime_pb2
 import tfnsw_gtfs_realtime_pb2
 from optparse import OptionParser
 import time
@@ -10,19 +9,21 @@ import datetime
 import pytz
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from urllib.request import urlopen,Request
+from urllib.request import urlopen, Request
 from model import *
 import logging, logging.handlers
 import logging.config
 
 p = OptionParser()
-p.add_option('-t', '--trip-updates', dest='tripUpdates', default='https://api.transport.nsw.gov.au/v1/gtfs/realtime/sydneytrains',
+p.add_option('-t', '--trip-updates', dest='tripUpdates',
+             default='https://api.transport.nsw.gov.au/v1/gtfs/realtime/sydneytrains',
              help='The trip updates URL', metavar='URL')
 
 p.add_option('-a', '--alerts', default='https://api.transport.nsw.gov.au/v1/gtfs/alerts/sydneytrains', dest='alerts',
              help='The alerts URL', metavar='URL')
 
-p.add_option('-p', '--vehicle-positions', dest='vehiclePositions', default='https://api.transport.nsw.gov.au/v1/gtfs/vehiclepos/sydneytrains',
+p.add_option('-p', '--vehicle-positions', dest='vehiclePositions',
+             default='https://api.transport.nsw.gov.au/v1/gtfs/vehiclepos/sydneytrains',
              help='The vehicle positions URL', metavar='URL')
 
 p.add_option('-d', '--database', default="mysql://root:19930203@localhost:3306/sydneytrain", dest='dsn',
@@ -53,11 +54,11 @@ p.add_option('-k', '--apikey', default="fGd82x1Rmc54VbqZR7DUj6wFDY9RjGb5FJrm", d
 p.add_option('-m', '--mode', default='train', dest='mode',
              help='mode of transportation E.g. Bus, Train', metavar='MODE')
 
-opts,args = p.parse_args()
-#opts= p.parse_args()
+opts, args = p.parse_args()
+# opts= p.parse_args()
 
-#Keep log
-#logging.config.fileConfig('../logging.conf')
+# Keep log
+# logging.config.fileConfig('../logging.conf')
 logger = logging.getLogger('GTFSR.log')
 
 if opts.dsn == None:
@@ -81,10 +82,9 @@ if opts.apiKey == None:
     print('Warning: no API Key specified, proceeding without API Key')
 
 if opts.mode == None:
-    #print 'Warning: no mode of transport specified, proceeding without mode of transport'
+    # print 'Warning: no mode of transport specified, proceeding without mode of transport'
     logger.warning('no mode of transport specified, proceeding without mode of transport')
     opts.mode = 'NA'
-
 
 # Connect to the database
 engine = create_engine(opts.dsn, echo=opts.verbose)
@@ -98,11 +98,11 @@ for table in Base.metadata.tables.keys():
     try:
         if not engine.has_table(table):
             if opts.create:
-                #print 'Creating table %s' % table
+                # print 'Creating table %s' % table
                 logger.info('Creating table %s', table)
                 Base.metadata.tables[table].create(engine)
             else:
-                #print 'Missing table %s! Use -c to create it.' % table
+                # print 'Missing table %s! Use -c to create it.' % table
                 logger.error('Missing table %s! Use -c to create it.', table)
                 exit(1)
     except Exception as err:
@@ -126,7 +126,8 @@ def getTrans(string, lang):
             untranslated = t.text
     return untranslated
 
-#Authentication information
+
+# Authentication information
 api_key = 'apikey AQucwct0lDO1culF8cwfpXy33jCMdkEJkVkEi'
 
 try:
@@ -135,8 +136,8 @@ try:
         try:
             # if True:
             if opts.apiKey:
-                #Add API key to the correct format to be included in the header
-                api_key='apikey' + ' ' + opts.apiKey
+                # Add API key to the correct format to be included in the header
+                api_key = 'apikey' + ' ' + opts.apiKey
 
             if opts.deleteOld:
                 # Go through all of the tables that we create, clear them
@@ -160,10 +161,11 @@ try:
 
                 # Check the feed version
                 if fm.header.gtfs_realtime_version != u'1.0':
-                    #print 'Warning: feed version has changed: found %s, expected 1.0' % fm.header.gtfs_realtime_version
-                    logger.warning('%s - %s - feed version has changed: found %s, expected 1.0', GTFSR_type, opts.mode, fm.header.gtfs_realtime_version)
+                    # print 'Warning: feed version has changed: found %s, expected 1.0' % fm.header.gtfs_realtime_version
+                    logger.warning('%s - %s - feed version has changed: found %s, expected 1.0', GTFSR_type, opts.mode,
+                                   fm.header.gtfs_realtime_version)
 
-                #print 'Adding %s trip updates' % len(fm.entity)
+                # print 'Adding %s trip updates' % len(fm.entity)
                 logger.info('%s - %s - Adding %s trip updates', GTFSR_type, opts.mode, len(fm.entity))
                 for entity in fm.entity:
 
@@ -194,12 +196,14 @@ try:
                             stop_sequence=stu.stop_sequence,
                             stop_id=stu.stop_id,
                             arrival_delay=stu.arrival.delay,
-                            #arrival_time=stu.arrival.time,
-                            arrival_time=datetime.datetime.fromtimestamp(stu.arrival.time, tz=pytz.timezone('Australia/Sydney')),
+                            # arrival_time=stu.arrival.time,
+                            arrival_time=datetime.datetime.fromtimestamp(stu.arrival.time,
+                                                                         tz=pytz.timezone('Australia/Sydney')),
                             arrival_uncertainty=stu.arrival.uncertainty,
                             departure_delay=stu.departure.delay,
-                            #departure_time=stu.departure.time,
-                            departure_time=datetime.datetime.fromtimestamp(stu.departure.time, tz=pytz.timezone('Australia/Sydney')),
+                            # departure_time=stu.departure.time,
+                            departure_time=datetime.datetime.fromtimestamp(stu.departure.time,
+                                                                           tz=pytz.timezone('Australia/Sydney')),
                             departure_uncertainty=stu.departure.uncertainty,
                             schedule_relationship=
                             tu.trip.DESCRIPTOR.enum_types_by_name['ScheduleRelationship'].values_by_number[
@@ -225,17 +229,18 @@ try:
 
                 # Check the feed version
                 if fm.header.gtfs_realtime_version != u'1.0':
-                    #print 'Warning: feed version has changed: found %s, expected 1.0' % fm.header.gtfs_realtime_version
-                    logger.warning('%s - %s - feed version has changed: found %s, expected 1.0', GTFSR_type, opts.mode, fm.header.gtfs_realtime_version)
+                    # print 'Warning: feed version has changed: found %s, expected 1.0' % fm.header.gtfs_realtime_version
+                    logger.warning('%s - %s - feed version has changed: found %s, expected 1.0', GTFSR_type, opts.mode,
+                                   fm.header.gtfs_realtime_version)
 
-                    #print 'Adding %s alerts' % len(fm.entity)
+                    # print 'Adding %s alerts' % len(fm.entity)
                 logger.info('%s - %s - Adding %s alerts', GTFSR_type, opts.mode, len(fm.entity))
 
                 for entity in fm.entity:
                     alert = entity.alert
                     dbalert = Alert(
-                        #start=alert.active_period[0].start,
-                        #end=alert.active_period[0].end,
+                        # start=alert.active_period[0].start,
+                        # end=alert.active_period[0].end,
                         cause=alert.DESCRIPTOR.enum_types_by_name['Cause'].values_by_number[alert.cause].name,
                         effect=alert.DESCRIPTOR.enum_types_by_name['Effect'].values_by_number[alert.effect].name,
                         url=getTrans(alert.url, opts.lang),
@@ -272,15 +277,15 @@ try:
 
                 # Convert this a Python object, and save it to be placed into each
                 # vehicle_position
-                timestamp = datetime.datetime.fromtimestamp(fm.header.timestamp,tz=pytz.timezone('Australia/Sydney'))
+                timestamp = datetime.datetime.fromtimestamp(fm.header.timestamp, tz=pytz.timezone('Australia/Sydney'))
 
                 # Check the feed version
                 if fm.header.gtfs_realtime_version != u'1.0':
-                    #print 'Warning: feed version has changed: found %s, expected 1.0' % fm.header.gtfs_realtime_version
+                    # print 'Warning: feed version has changed: found %s, expected 1.0' % fm.header.gtfs_realtime_version
                     logger.warning('%s - %s - feed version has changed: found %s, expected 1.0', GTFSR_type, opts.mode,
                                    fm.header.gtfs_realtime_version)
 
-                #print 'Adding %s vehicle_positions' % len(fm.entity)
+                # print 'Adding %s vehicle_positions' % len(fm.entity)
                 logger.info('%s - %s - Adding %s vehicle_positions', GTFSR_type, opts.mode, len(fm.entity))
                 for entity in fm.entity:
                     vp = entity.vehicle
@@ -298,13 +303,18 @@ try:
                         position_longitude=vp.position.longitude,
                         position_bearing=vp.position.bearing,
                         position_speed=vp.position.speed,
-                        position_timestamp=datetime.datetime.fromtimestamp(vp.timestamp,tz=pytz.timezone('Australia/Sydney')),
+                        position_timestamp=datetime.datetime.fromtimestamp(vp.timestamp,
+                                                                           tz=pytz.timezone('Australia/Sydney')),
                         congestion_level=vp.congestion_level,
                         occupancy_status=vp.occupancy_status,
-                        air_conditioned=vp.vehicle.Extensions[tfnsw_gtfs_realtime_pb2.tfnsw_vehicle_descriptor].air_conditioned,
-                        wheelchair_accessible=vp.vehicle.Extensions[tfnsw_gtfs_realtime_pb2.tfnsw_vehicle_descriptor].wheelchair_accessible,
-                        vehicle_model=vp.vehicle.Extensions[tfnsw_gtfs_realtime_pb2.tfnsw_vehicle_descriptor].vehicle_model,
-                        special_vehicle_attributes=vp.vehicle.Extensions[tfnsw_gtfs_realtime_pb2.tfnsw_vehicle_descriptor].special_vehicle_attributes,
+                        air_conditioned=vp.vehicle.Extensions[
+                            tfnsw_gtfs_realtime_pb2.tfnsw_vehicle_descriptor].air_conditioned,
+                        wheelchair_accessible=vp.vehicle.Extensions[
+                            tfnsw_gtfs_realtime_pb2.tfnsw_vehicle_descriptor].wheelchair_accessible,
+                        vehicle_model=vp.vehicle.Extensions[
+                            tfnsw_gtfs_realtime_pb2.tfnsw_vehicle_descriptor].vehicle_model,
+                        special_vehicle_attributes=vp.vehicle.Extensions[
+                            tfnsw_gtfs_realtime_pb2.tfnsw_vehicle_descriptor].special_vehicle_attributes,
                         timestamp=timestamp,
                         transport_mode=opts.mode
                     )
@@ -316,8 +326,8 @@ try:
             session.commit()
         except:
             # else:
-            #print 'Exception occurred in iteration'
-            #print sys.exc_info()
+            # print 'Exception occurred in iteration'
+            # print sys.exc_info()
             logger.error('%s - %s - Exception occurred in iteration: %s', GTFSR_type, opts.mode, sys.exc_info())
 
         # put this outside the try...except so it won't be skipped when something

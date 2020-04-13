@@ -180,9 +180,6 @@ def trip_update_date_processing(df):
     entity_stop_time_update_scheduleRelationship = pd.Series(entity_stop_time_update_scheduleRelationship)
     df['update_scheduleRelationship'] = entity_stop_time_update_scheduleRelationship
 
-    df = df[df.route_id != 'RTTA_DEF']
-    df = df[df.route_id != 'RTTA_REV']
-
     df.drop('id', axis=1, inplace=True)
 
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='s')
@@ -208,14 +205,44 @@ def trip_update_date_processing(df):
     df['date'], df['time'] = df.timestamp.str.split(' ', 1).str
     df.drop('timestamp', axis=1, inplace=True)
 
-    # rearrage the order of columns
+    # re-arrange the order of columns
     df = df[['date', 'time', 'trip_id', 'route_id', 'schedule_relationship', 'stop_id', 'arrival_time',
              'arrival_delay', 'departure_time', 'departure_delay', 'update_scheduleRelationship']]
     df.reset_index(drop=True, inplace=True)
 
     file_date = df.date[0]
 
-    hdr = False if os.path.isfile(dir_name + 'trip_update_' + file_date + '.csv') else True
-    df.to_csv(dir_name + 'trip_update_' + file_date + '.csv', mode='a', header=hdr, index=False)
+    # Drop the rows of Nsw Trains
+    df = df[~(df["route_id"].isin(['BMT_1', 'BMT_2', 'CCN_1a', 'CCN_1b', 'CCN_1c',
+                                   'CCN_2a', 'CCN_2b', 'CTY_NC1', 'CTY_NC1a',
+                                   'CTY_NC2', 'CTY_NW1a', 'CTY_NW1b', 'CTY_NW1c',
+                                   'CTY_NW1d', 'CTY_NW2a', 'CTY_NW2b', 'CTY_S1a',
+                                   'CTY_S1b', 'CTY_S1c', 'CTY_S1d', 'CTY_S1e',
+                                   'CTY_S1f', 'CTY_S1g', 'CTY_S1h', 'CTY_S1i',
+                                   'CTY_S2a', 'CTY_S2b', 'CTY_S2c', 'CTY_S2d',
+                                   'CTY_S2e', 'CTY_S2f', 'CTY_S2g', 'CTY_S2h',
+                                   'CTY_S2i', 'CTY_W1a', 'CTY_W1b', 'CTY_W2a',
+                                   'CTY_W2b', 'HUN_1a', 'HUN_1b', 'HUN_2a',
+                                   'HUN_2b', 'SCO_1a', 'SCO_1b', 'SCO_2a',
+                                   'SCO_2b', 'SHL_1a', 'SHL_1b', 'SHL_1c',
+                                   'SHL_1d', 'SHL_1e', 'SHL_2a', 'SHL_2b', 'SHL_2c',
+                                   'SHL_2d', 'SHL_2e', 'RTTA_DEF', 'RTTA_REV']))]
+
+    # df.to_csv(dir_name + 'test_ trip_update_' + file_date + '.csv', index=False)
+
+    if os.path.isfile(dir_name + 'trip_update_' + file_date + '.csv'):
+        df2 = pd.read_csv(dir_name + 'trip_update_' + file_date + '.csv', dtype={'stop_id': 'str'})
+        df2 = pd.concat([df, df2]).drop_duplicates(subset=['trip_id', 'stop_id']).reset_index(drop=True)
+        df2 = df2.sort_values(by=['time'])
+        print(len(df), len(df2))
+        df2.to_csv(dir_name + 'trip_update_' + file_date + '.csv', index=False)
+    else:
+        df = df.drop_duplicates()
+        df = df.sort_values(by=['time'])
+        df['stop_id'] = df['stop_id'].astype('str')
+        df.to_csv(dir_name + 'trip_update_' + file_date + '.csv', index=False)
+
+    # hdr = False if os.path.isfile(dir_name + 'trip_update_' + file_date + '.csv') else True
+    # df.to_csv(dir_name + 'trip_update_' + file_date + '.csv', mode='a', header=hdr, index=False)
 
     print('finish trip update data processing.')

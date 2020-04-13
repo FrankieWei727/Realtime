@@ -7,15 +7,16 @@ import os
 from dataProcess import timetable_data_clean as data_clean
 
 
-def timetable(api, model):
+def timetable(api, model, session, timetable_table, logger):
+
     print('start getting timetable data.')
     os.chdir(os.path.dirname(__file__))
     path = os.getcwd() + '/timetable/'
 
-    response_time = requests.get('https://api.transport.nsw.gov.au/v1/gtfs/schedule/' + model,
-                                 headers={'Authorization': api})
+    response_timetable = requests.get('https://api.transport.nsw.gov.au/v1/gtfs/schedule/' + model,
+                                      headers={'Authorization': api})
 
-    f = ZipFile(BytesIO(response_time.content))
+    f = ZipFile(BytesIO(response_timetable.content))
     f.extractall(path=path)
 
     all_files = glob.glob(path + "/*.txt")
@@ -31,4 +32,4 @@ def timetable(api, model):
 
     print('finish getting timetable data.')
 
-    data_clean.timetable_data_processing()
+    data_clean.timetable_data_processing(session, timetable_table, logger, model)

@@ -6,7 +6,7 @@ from protobuf import tfnsw_gtfs_realtime_pb2
 from dataProcess import vehicle_position_data_clean as data_clean
 
 
-def vehicle_position(api, model):
+def vehicle_position(api, model, session, vehicle_position_table, logger):
     print('start getting vehicle position data.')
     os.chdir(os.path.dirname(__file__))
     dir_name = os.getcwd() + '/vehiclePosition/'
@@ -25,4 +25,4 @@ def vehicle_position(api, model):
 
     print('finish getting vehicle position data.')
 
-    data_clean.vehicle_position_data_processing(df)
+    data_clean.vehicle_position_data_processing(df, session, vehicle_position_table, logger, model)
