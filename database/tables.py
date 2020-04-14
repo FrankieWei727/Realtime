@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, \
-    Float, BigInteger, Date, Time, Text
+    Float, BigInteger, Date, Time, Text, DateTime
 
 Base = declarative_base()
 
@@ -63,9 +63,9 @@ class TripUpdate(Base):
     schedule_relationship = Column(String(30))
     stop_id = Column(String(30))
 
-    arrival_time = Column(Time)
+    arrival_time = Column(DateTime)
     arrival_delay = Column(Integer)
-    departure_time = Column(Time)
+    departure_time = Column(DateTime)
     departure_delay = Column(Integer)
     update_scheduleRelationship = Column(String(30))
 

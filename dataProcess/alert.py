@@ -6,7 +6,7 @@ from google.protobuf import json_format
 from dataProcess import alert_data_clean as data_clean
 
 
-def alert(api_key, model):
+def alert(api_key, model, session, station_alert_table, line_alert_table, trip_alert_table, logger):
     print('start getting alter data.')
     os.chdir(os.path.dirname(__file__))
     dir_name = os.getcwd() + '/alert/'
@@ -24,4 +24,5 @@ def alert(api_key, model):
 
     print('finish getting alter data.')
 
-    data_clean.alert_data_processing(df)
+    data_clean.alert_data_processing(df, model, session, station_alert_table, line_alert_table, trip_alert_table,
+                                     logger)

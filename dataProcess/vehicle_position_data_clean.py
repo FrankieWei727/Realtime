@@ -14,6 +14,7 @@ def vehicle_position_data_processing(df, session, vehicle_position_table, logger
     file_date = date.today().strftime("%Y%m%d")
 
     print('vehicle position data processing')
+
     try:
         vehicle = []
         tripId = []
@@ -27,7 +28,10 @@ def vehicle_position_data_processing(df, session, vehicle_position_table, logger
         label = []
 
         for entity in data['entity']:
-            vehicle.append(entity['vehicle']['vehicle']['id'])
+            if 'id' in entity['vehicle']['vehicle']:
+                vehicle.append(entity['vehicle']['vehicle']['id'])
+            else:
+                vehicle.append("")
             tripId.append(entity['vehicle']['trip']['tripId'])
             stopId.append(entity['vehicle']['stopId'])
             if 'routeId' in entity['vehicle']['trip']:

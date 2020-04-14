@@ -8,21 +8,6 @@ from dataProcess import static_timetable, trip_update, alert, vehicle_position
 from sqlalchemy.orm import sessionmaker
 
 
-def set_parser():
-    parser = argparse.ArgumentParser(description='Search some files')
-
-    parser.add_argument('-a', '--apiKey', default=api_key, help='the apiKey', action='store_true')
-
-    parser.add_argument('-A', '--alert', default=alert.alert(api_key, model),
-                        help='running the alert model to grab realtime timetable', action='store_true')
-
-    args = parser.parse_args()
-
-    if args.apiKey is None:
-        print('Warning: the apiKey is missing.')
-        exit(1)
-
-
 def create_log():
     # create logger
     log_path = "log/logging.conf"
@@ -80,19 +65,19 @@ if __name__ == '__main__':
                            "3.alert \n4.vehicle position \n5.delete table \n6.exit \n:")
 
             if option == "1":
-                logger.info(model + ": grab trip update info")
-                trip_update.trip_update(api_key, model)
+                logger.info("%s - grab trip update info", model)
+                trip_update.trip_update(api_key, model, s, tables.TripUpdate, logger)
 
             if option == "2":
                 logger.info("%s - grab static timetable info", model)
                 static_timetable.timetable(api_key, model, s, tables.Timetable, logger)
 
             if option == "3":
-                logger.info(model + ": grab alert info")
-                alert.alert(api_key, model)
+                logger.info("%s - grab alert info", model)
+                alert.alert(api_key, model, s, tables.StationAlert, tables.LineAlert, tables.TripAlert, logger)
 
             if option == "4":
-                logger.info(model + ": grab vehicle position info")
+                logger.info("%s - grab vehicle position info", model)
                 vehicle_position.vehicle_position(api_key, model, s, tables.VehiclePosition, logger)
 
             if option == "5":
