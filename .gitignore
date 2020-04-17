@@ -1,8 +1,9 @@
 # Project exclude paths
 /venv/
 __pycache__
-log
+data/log
 .ipynb_checkpoints
 *.csv
 *.json
-apikey.txt
+data/apikey.txt
+data/*.txt
