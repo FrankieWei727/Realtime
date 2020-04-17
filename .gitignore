@@ -6,4 +6,4 @@ data/log
 *.csv
 *.json
 data/apikey.txt
-data/*.txt
+data/**/*.txt
