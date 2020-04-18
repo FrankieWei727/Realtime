@@ -1,13 +1,12 @@
 from os import path
 import os
-import time
 import logging.config
 from data.database import tables
 from sqlalchemy import create_engine
 from data.dataProcess import trip_update, static_timetable, alert, vehicle_position
 from sqlalchemy.orm import sessionmaker
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.background import BackgroundScheduler, BlockingScheduler
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 
 
@@ -46,13 +45,13 @@ if __name__ == '__main__':
     s = session()
 
     executors = {
-        # 'default': ThreadPoolExecutor(90),
-        'processpool': ProcessPoolExecutor(max_workers=1)
+        'default': ThreadPoolExecutor(20),
+        'processpool': ProcessPoolExecutor(max_workers=5)
     }
 
     job_defaults = {
         'coalesce': True,
-        'max_instances': 1,
+        'max_instances': 5,
         'misfire_grace_time': 30
     }
     scheduler = BackgroundScheduler(executors=executors, job_defaults=job_defaults)
@@ -76,50 +75,33 @@ if __name__ == '__main__':
     logger.info("Start running project ---- model %s", model)
 
 
-    # keep_running = True
-    # while keep_running:
-    #     #     vehicle_position.vehicle_position(api_key, model, s, tables.VehiclePosition, logger)
-    #     #     trip_update.trip_update(api_key, model, s, tables.TripUpdate, logger)
-    #     alert.alert(api_key, model, s, tables.StationAlert, tables.LineAlert, tables.TripAlert, logger)
-    #     time.sleep(10)
-
     def job_timetable():
         static_timetable.timetable(api_key, model, s, logger)
 
 
-    def job_trip_update():
+    def job_update_info():
         trip_update.trip_update(api_key, model, s, logger)
-
-
-    def job_vehicle_position():
         vehicle_position.vehicle_position(api_key, model, s, logger)
-
-
-    def job_alert():
         alert.alert(api_key, model, s, logger)
 
 
-    def my_listerner(event):
+    def my_listener(event):
         if event.exception:
             scheduler.shutdown()
             session.close_all()
-            print('任务出错了！')
+            print('The job crashed :(')
             exit(0)
         else:
-            print('任务正常运行中...')
+            print('The job worked :)')
 
 
-    scheduler.add_job(job_timetable, trigger='interval', hours=1, replace_existing=True, id="job_timetable")
-    scheduler.add_job(job_vehicle_position, trigger="interval", minutes=1, replace_existing=True,
-                      id="job_vehicle_position")
-    scheduler.add_job(job_alert, trigger="interval", minutes=5, replace_existing=True, id="job_alert")
-    scheduler.add_job(job_trip_update, trigger="interval", minutes=2, replace_existing=True, id="job_trip_update")
-    scheduler.add_listener(my_listerner, EVENT_JOB_ERROR | EVENT_JOB_EXECUTED)
+    scheduler.add_job(job_timetable, 'interval', hours=1, jitter=120, id="job_timetable")
+    scheduler.add_job(job_update_info, 'interval', minutes=1, id="job_update_info")
+    scheduler.add_listener(my_listener, EVENT_JOB_ERROR | EVENT_JOB_EXECUTED)
 
     keep_running = True
     while keep_running:
-        option = input("Please select: \n1.get data \n2.delete tables \n3.pause project\n"
-                       "4.exit\n:")
+        option = input("Please select: 1.get data 2.delete tables 3.pause project 4.exit :")
         if option == "1":
             scheduler.start()
 

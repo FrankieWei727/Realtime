@@ -162,5 +162,3 @@ def timetable(api, model, session, logger):
     #
     #     if file.endswith(".txt"):
     #         os.remove(os.path.join(path, file))
-
-    data_clean.timetable_data_processing(session, timetable_table, logger, model)
