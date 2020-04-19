@@ -114,6 +114,9 @@ def trip_update(api, model, session, logger):
                     FROM public.trip_update t2
                     WHERE t1.trip_id = t2.trip_id
                         AND t1.stop_id = t2.stop_id
+                        AND EXTRACT(YEAR FROM t1.datetime) = EXTRACT(YEAR FROM t2.datetime)
+                        AND EXTRACT(MONTH FROM t1.datetime) = EXTRACT(MONTH FROM t2.datetime)
+                        AND EXTRACT(DAY FROM t1.datetime) = EXTRACT(DAY FROM t2.datetime)
                         AND t1.datetime < t2.datetime);
     '''
     session.execute(text(query_delete_older_record))

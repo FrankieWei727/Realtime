@@ -1,4 +1,6 @@
 from datetime import date
+
+import numpy as np
 import requests
 from io import BytesIO
 from zipfile import ZipFile
@@ -33,25 +35,32 @@ def timetable(api, model, session, logger):
     df_stops = pd.read_csv(files.open('stops.txt'))
     df_trips = pd.read_csv(files.open('trips.txt'))
 
-    # merge agency.csv and routes.csv
+    # add parent station name to stops
+    parent_station_name = []
+    for row in df_stops.itertuples():
+        if pd.notnull(row.parent_station):
+            parent_station_name.append(df_stops[df_stops['stop_code'] == row.parent_station].stop_name.values[0])
+        else:
+            parent_station_name.append(np.nan)
+    df_stops['parent_station_name'] = pd.Series(parent_station_name)
+
+    # Merge agency.csv and routes.csv
     df_update = pd.merge(df_routes, df_agency, on='agency_id')
-    # merge trips.csv
+    # Merge trips.csv
     df_update = pd.merge(df_trips, df_update, on='route_id')
-    # merge calendar.csv
+    # Merge calendar.csv
     df_update = pd.merge(df_update, df_calendar, on='service_id')
-
-    # merge stop_times.csv and stops.csv
+    # Merge stop_times.csv and stops.csv
     df_update_stop = pd.merge(df_stops, df_stop_times, on='stop_id')
-
-    # merge df_update and df_update_stop
+    # Merge df_update and df_update_stop
     df = pd.merge(df_update, df_update_stop, on='trip_id')
 
+    # Drop columns
     df = df.drop(['stop_desc', 'zone_id', 'stop_url', 'stop_timezone', 'shape_dist_traveled',
                   'trip_short_name', 'route_url', 'agency_phone', 'agency_lang',
                   'agency_url', 'route_desc', 'agency_id', 'stop_headsign', 'stop_code'], axis=1)
 
     df = df.astype({"route_id": str, "parent_station": str, "end_date": str, "start_date": str, "block_id": str})
-
     df = df[df.start_date == today]
 
     # Services with route_id as RTTA_DEF or RTTA_REV are non-revenue services and should be excluded
@@ -61,16 +70,6 @@ def timetable(api, model, session, logger):
     df = df[df['agency_name'] != 'NSW Trains']
 
     df.sort_values(['start_date', 'trip_id', 'arrival_time'], ascending=[True, True, True], inplace=True)
-
-    # rearrange the order of columns
-    df = df[['start_date', 'end_date', 'arrival_time', 'departure_time',
-             'route_id', 'route_short_name', 'route_long_name', 'route_type', 'route_color', 'route_text_color',
-             'service_id', 'trip_id', 'trip_headsign', 'direction_id',
-             'stop_id', 'stop_name', 'stop_sequence', 'pickup_type', 'drop_off_type', 'block_id', 'shape_id',
-             'stop_lat', 'stop_lon', 'location_type', 'parent_station', 'wheelchair_accessible',
-             'wheelchair_boarding',
-             'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
-             'agency_name', 'agency_timezone']]
 
     # Set the time to None and drop them when the time is > 24:00:00, example 24:33:00
     df['arrival_time'] = pd.to_datetime(df['arrival_time'], errors='coerce')
@@ -107,6 +106,7 @@ def timetable(api, model, session, logger):
                 stop_lon=entity.stop_lon,
                 location_type=entity.location_type,
                 parent_station=entity.parent_station,
+                parent_station_name=entity.parent_station_name,
                 wheelchair_accessible=entity.wheelchair_accessible,
                 monday=entity.monday,
                 tuesday=entity.tuesday,
@@ -150,15 +150,14 @@ def timetable(api, model, session, logger):
     count = session.query(tables.Timetable.id).count()
     logger.info('%s - timetable - Total %s rows in database', model, count)
 
-    df.to_csv(path + 'timetable_' + today + '.csv', index=False)
+    # Rearrange the order of columns
+    # df = df[
+    #     ['start_date', 'end_date', 'arrival_time', 'departure_time', 'route_id', 'route_short_name', 'route_long_name',
+    #      'route_type', 'route_color', 'route_text_color', 'service_id', 'trip_id', 'trip_headsign', 'direction_id',
+    #      'stop_id', 'stop_name', 'stop_sequence', 'pickup_type', 'drop_off_type', 'block_id', 'shape_id', 'stop_lat',
+    #      'stop_lon', 'location_type', 'parent_station', 'parent_station_name', 'wheelchair_accessible',
+    #      'wheelchair_boarding', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+    #      'agency_name', 'agency_timezone']]
 
-    # all_files = glob.glob(path + "/*.txt")
-    #
-    # # convert txt files to csv files and delete all of them
-    # for file in all_files:
-    #     df = pd.read_csv(file, low_memory=False)
-    #     filename = file.split(".")[0]
-    #     df.to_csv(filename + '.csv', index=False)
-    #
-    #     if file.endswith(".txt"):
-    #         os.remove(os.path.join(path, file))
+    # Output all the data to csv file
+    # df.to_csv(path + 'timetable_' + today + '.csv', index=False)

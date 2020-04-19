@@ -47,11 +47,13 @@ def vehicle_position(api, model, session, logger):
                 vehicle=entity.vehicle.id,
                 trip_id=entity.trip.trip_id,
                 stop_id=entity.stop_id,
-                schedule_relationship=entity.trip.schedule_relationship,
+                schedule_relationship=entity.trip.DESCRIPTOR.enum_types_by_name[
+                    'ScheduleRelationship'].values_by_number[entity.trip.schedule_relationship].name,
                 route_id=entity.trip.route_id,
                 lat=entity.position.latitude,
                 lon=entity.position.longitude,
-                congestion_level=entity.congestion_level,
+                congestion_level=entity.DESCRIPTOR.enum_types_by_name['CongestionLevel'].values_by_number[
+                    entity.congestion_level].name,
                 label=entity.vehicle.label
             )
             session.add(data)
@@ -73,6 +75,9 @@ def vehicle_position(api, model, session, logger):
                                     AND v1.lon = v2.lon
                                     AND v1.congestion_level = v2.congestion_level
                                     AND v1.label = v2.label
+                                    AND EXTRACT(YEAR FROM v1.datetime) = EXTRACT(YEAR FROM v2.datetime)
+                                    AND EXTRACT(MONTH FROM v1.datetime) = EXTRACT(MONTH FROM v2.datetime)
+                                    AND EXTRACT(DAY FROM v1.datetime) = EXTRACT(DAY FROM v2.datetime)
                                     AND v1.datetime < v2.datetime);
     '''
     session.execute(text(query_delete_older_record))
@@ -95,9 +100,9 @@ def vehicle_position(api, model, session, logger):
     '''
     session.execute(text(query_delete_duplicate))
     query_reset = '''
-              UPDATE public.vehicle_position SET id= (SELECT MAX(id) FROM public.vehicle_position) + nextval('public.vehicle_position_id_seq');
-              ALTER SEQUENCE public.vehicle_position_id_seq RESTART;
-              UPDATE public.vehicle_position SET id= nextval('public.vehicle_position_id_seq');
+            UPDATE public.vehicle_position SET id= (SELECT MAX(id) FROM public.vehicle_position) + nextval('public.vehicle_position_id_seq');
+            ALTER SEQUENCE public.vehicle_position_id_seq RESTART;
+            UPDATE public.vehicle_position SET id= nextval('public.vehicle_position_id_seq');
     '''
     session.execute(text(query_reset))
 

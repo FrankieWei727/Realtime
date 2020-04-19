@@ -15,6 +15,9 @@ class Timetable(Base):
     arrival_time = Column(Time)
     departure_time = Column(Time)
 
+    trip_id = Column(String(50))
+    trip_headsign = Column(Text)
+
     route_id = Column(String(30))
     route_short_name = Column(String(30))
     route_long_name = Column(String(50))
@@ -23,8 +26,6 @@ class Timetable(Base):
     route_text_color = Column(String(30))
     service_id = Column(String(32))
 
-    trip_id = Column(String(50))
-    trip_headsign = Column(Text)
 
     direction_id = Column(Integer)
     stop_id = Column(String(30))
@@ -38,6 +39,7 @@ class Timetable(Base):
     stop_lon = Column(Float)
     location_type = Column(Integer)
     parent_station = Column(String(32))
+    parent_station_name = Column(String(50))
     wheelchair_accessible = Column(Integer)
     monday = Column(Integer)
     tuesday = Column(Integer)

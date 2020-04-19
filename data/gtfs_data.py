@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from data.dataProcess import trip_update, static_timetable, alert, vehicle_position
 from sqlalchemy.orm import sessionmaker
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
-from apscheduler.schedulers.background import BackgroundScheduler, BlockingScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 
 
@@ -41,8 +41,8 @@ if __name__ == '__main__':
     logger = create_log()
 
     engine = connect_database()
-    session = sessionmaker(bind=engine)
-    s = session()
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
     executors = {
         'default': ThreadPoolExecutor(20),
@@ -58,16 +58,16 @@ if __name__ == '__main__':
 
     if api_key is None:
         logger.warning('API key is require.')
-        exit(0)
+        exit(1)
 
-    # Check if it has the tables
+    # Check if it has the tables before start the project
     for table in tables.Base.metadata.tables.keys():
         try:
             if not engine.has_table(table):
                 logger.info('Creating table %s', table)
                 tables.Base.metadata.tables[table].create(engine)
             else:
-                logger.info('The tables has been created --- %s', table)
+                logger.info('%s - The tables has been created --- %s', model, table)
         except Exception as err:
             logger.error('Database Error: %s', str(err))
             exit(1)
@@ -76,13 +76,44 @@ if __name__ == '__main__':
 
 
     def job_timetable():
-        static_timetable.timetable(api_key, model, s, logger)
+        static_timetable.timetable(api_key, model, session, logger)
 
 
     def job_update_info():
-        trip_update.trip_update(api_key, model, s, logger)
-        vehicle_position.vehicle_position(api_key, model, s, logger)
-        alert.alert(api_key, model, s, logger)
+        trip_update.trip_update(api_key, model, session, logger)
+        vehicle_position.vehicle_position(api_key, model, session, logger)
+        alert.alert(api_key, model, session, logger)
+
+
+    def jod_delete_older_record():
+        # Delete the data of 3 days age
+        logger.info("%s - Delete the old data of 3 days ago", model)
+        session.execute("""
+            DELETE FROM public.trip_alert
+                  WHERE datetime < CURRENT_TIMESTAMP(2) - interval '3 day'
+        """)
+        session.execute("""
+            DELETE FROM public.line_alert
+                  WHERE datetime < CURRENT_TIMESTAMP(2) - interval '3 day'
+        """)
+        session.execute("""
+            DELETE FROM public.station_alert
+                  WHERE datetime < CURRENT_TIMESTAMP(2) - interval '3 day'
+        """)
+        session.execute("""
+            DELETE FROM public.trip_update
+                  WHERE datetime < CURRENT_TIMESTAMP(2) - interval '3 day'
+        """)
+        session.execute("""
+            DELETE FROM public.vehicle_position
+                  WHERE datetime < CURRENT_TIMESTAMP(2) - interval '3 day'
+        """)
+        session.execute("""
+            DELETE FROM public.timetable
+                  WHERE start_date < CURRENT_TIMESTAMP(2) - interval '3 day'
+        """)
+
+        session.commit()
 
 
     def my_listener(event):
@@ -90,13 +121,15 @@ if __name__ == '__main__':
             scheduler.shutdown()
             session.close_all()
             print('The job crashed :(')
-            exit(0)
+            logger.warning("%s - %s", model, event.exception)
+            exit(1)
         else:
             print('The job worked :)')
 
 
-    scheduler.add_job(job_timetable, 'interval', hours=1, jitter=120, id="job_timetable")
-    scheduler.add_job(job_update_info, 'interval', minutes=1, id="job_update_info")
+    scheduler.add_job(job_timetable, 'cron', hour=5, jitter=120, id="job_timetable")
+    scheduler.add_job(jod_delete_older_record, 'cron', hour=1, jitter=120, id="jod_delete_older_record")
+    scheduler.add_job(job_update_info, 'cron', hour='6-23', minute="*", id="job_update_info")
     scheduler.add_listener(my_listener, EVENT_JOB_ERROR | EVENT_JOB_EXECUTED)
 
     keep_running = True
@@ -108,19 +141,20 @@ if __name__ == '__main__':
         if option == "2":
             for theClass in tables.AllClasses:
                 theClass.__table__.drop(engine)
-            logger.info("Delete all the tables --- %s", tables.Base.metadata.tables.keys())
+            logger.info("%s - Delete all the tables --- %s", model, tables.Base.metadata.tables.keys())
 
         if option == "3":
-            logger.info("Pause the project.")
+            logger.info("%s - Pause the project.", model)
             scheduler.pause_job('job_timetable')
             scheduler.pause_job('job_trip_update')
             scheduler.pause_job('job_vehicle_position')
             scheduler.pause_job('job_alert')
 
         if option == "4":
-            logger.info("Stop running project.")
             scheduler.remove_all_jobs()
-            scheduler.shutdown()
+            if scheduler.state is not 0:
+                scheduler.shutdown()
             session.close_all()
+            logger.info("Stop running project ---- model %s", model)
             keep_running = False
-            exit(0)
+    exit(0)

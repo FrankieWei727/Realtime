@@ -77,6 +77,9 @@ def alert(api_key, model, session, logger):
                             AND s1.effect = s2.effect
                             AND s1.header_text = s2.header_text
                             AND s1.description_text = s2.description_text
+                            AND EXTRACT(YEAR FROM s1.datetime) = EXTRACT(YEAR FROM s2.datetime)
+                            AND EXTRACT(MONTH FROM s1.datetime) = EXTRACT(MONTH FROM s2.datetime)
+                            AND EXTRACT(DAY FROM s1.datetime) = EXTRACT(DAY FROM s2.datetime)
                             AND s1.datetime < s2.datetime);
     '''
     session.execute(text(query_delete_older_record))
@@ -95,9 +98,9 @@ def alert(api_key, model, session, logger):
     '''
     session.execute(text(query_delete_duplicate))
     query_reset = '''
-              UPDATE public.station_alert SET id= (SELECT MAX(id) FROM public.station_alert) + nextval('public.station_alert_id_seq');
-              ALTER SEQUENCE public.station_alert_id_seq RESTART;
-              UPDATE public.station_alert SET id= nextval('public.station_alert_id_seq');
+            UPDATE public.station_alert SET id= (SELECT MAX(id) FROM public.station_alert) + nextval('public.station_alert_id_seq');
+            ALTER SEQUENCE public.station_alert_id_seq RESTART;
+            UPDATE public.station_alert SET id= nextval('public.station_alert_id_seq');
     '''
     session.execute(text(query_reset))
 
@@ -111,32 +114,35 @@ def alert(api_key, model, session, logger):
     """
     # Remove all duplication rows and reset the id start with 1
     query_delete_older_record = '''
-                  DELETE FROM public.line_alert l1
-                          WHERE EXISTS (
-                              SELECT *
-                              FROM public.line_alert l2
-                              WHERE l1.route_id = l2.route_id
-                                  AND l1.header_text = l2.header_text
-                                  AND l1.description_text = l2.description_text
-                                  AND l1.datetime < l2.datetime);
+              DELETE FROM public.line_alert l1
+                      WHERE EXISTS (
+                          SELECT *
+                          FROM public.line_alert l2
+                          WHERE l1.route_id = l2.route_id
+                              AND l1.header_text = l2.header_text
+                              AND l1.description_text = l2.description_text
+                              AND EXTRACT(YEAR FROM l1.datetime) = EXTRACT(YEAR FROM l2.datetime)
+                              AND EXTRACT(MONTH FROM l1.datetime) = EXTRACT(MONTH FROM l2.datetime)
+                              AND EXTRACT(DAY FROM l1.datetime) = EXTRACT(DAY FROM l2.datetime)
+                              AND l1.datetime < l2.datetime);
           '''
     session.execute(text(query_delete_older_record))
     query_delete_duplicate = '''
-                  DELETE FROM public.line_alert l1
-                          WHERE EXISTS (
-                              SELECT *
-                              FROM public.line_alert l2
-                              WHERE l1.route_id = l2.route_id
-                                  AND l1.header_text = l2.header_text
-                                  AND l1.description_text = l2.description_text
-                                  AND l1.datetime = l2.datetime
-                                  AND l1.id < l2.id);
+              DELETE FROM public.line_alert l1
+                      WHERE EXISTS (
+                          SELECT *
+                          FROM public.line_alert l2
+                          WHERE l1.route_id = l2.route_id
+                              AND l1.header_text = l2.header_text
+                              AND l1.description_text = l2.description_text
+                              AND l1.datetime = l2.datetime
+                              AND l1.id < l2.id);
           '''
     session.execute(text(query_delete_duplicate))
     query_reset = '''
-                    UPDATE public.line_alert SET id= (SELECT MAX(id) FROM public.line_alert) + nextval('public.line_alert_id_seq');
-                    ALTER SEQUENCE public.line_alert_id_seq RESTART;
-                    UPDATE public.line_alert SET id= nextval('public.line_alert_id_seq');
+                UPDATE public.line_alert SET id= (SELECT MAX(id) FROM public.line_alert) + nextval('public.line_alert_id_seq');
+                ALTER SEQUENCE public.line_alert_id_seq RESTART;
+                UPDATE public.line_alert SET id= nextval('public.line_alert_id_seq');
           '''
     session.execute(text(query_reset))
 
@@ -158,6 +164,9 @@ def alert(api_key, model, session, logger):
                         WHERE t1.trip_id = t2.trip_id
                             AND t1.header_text = t2.header_text
                             AND t1.description_text = t2.description_text
+                            AND EXTRACT(YEAR FROM t1.datetime) = EXTRACT(YEAR FROM t2.datetime)
+                            AND EXTRACT(MONTH FROM t1.datetime) = EXTRACT(MONTH FROM t2.datetime)
+                            AND EXTRACT(DAY FROM t1.datetime) = EXTRACT(DAY FROM t2.datetime)
                             AND t1.datetime < t2.datetime);
     '''
     session.execute(text(query_delete_older_record))

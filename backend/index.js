@@ -5,9 +5,9 @@ const routers = require('./routers');
 const app = express();
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(cors());
-app.use('/',routers);
+app.use('/', routers);
 
 
 const port = process.env.PORT || 3000;

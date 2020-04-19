@@ -1,6 +1,6 @@
 const {pool} = require('./config');
 
-const getTimetable = (request, response) => {
+const getTimetableByTripId = (request, response) => {
     "use strict";
     pool.query('SELECT * FROM public.timetable ORDER BY id ASC LIMIT 100', (error, results) => {
         if (error) {
@@ -22,6 +22,6 @@ const getUserById = (request, response) => {
 };
 
 module.exports = {
-    getTimetable,
+    getTimetableByTripId,
     getUserById,
 };
