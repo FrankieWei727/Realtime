@@ -4,7 +4,7 @@
     <option asi="false" />
     <option bitwise="true" />
     <option boss="false" />
-    <option browser="true" />
+    <option browser="false" />
     <option browserify="false" />
     <option camelcase="false" />
     <option couch="false" />
@@ -44,7 +44,7 @@
     <option moz="false" />
     <option multistr="false" />
     <option newcap="false" />
-    <option noarg="true" />
+    <option noarg="false" />
     <option nocomma="false" />
     <option node="true" />
     <option noempty="true" />
@@ -68,7 +68,7 @@
     <option shelljs="false" />
     <option singleGroups="false" />
     <option smarttabs="false" />
-    <option strict="true" />
+    <option strict="false" />
     <option sub="false" />
     <option supernew="false" />
     <option trailing="false" />

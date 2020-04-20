@@ -61,6 +61,7 @@ if __name__ == '__main__':
         exit(1)
 
     # Check if it has the tables before start the project
+    logger.info('%s - Check if it has the tables before start the project', model)
     for table in tables.Base.metadata.tables.keys():
         try:
             if not engine.has_table(table):
@@ -127,9 +128,9 @@ if __name__ == '__main__':
             print('The job worked :)')
 
 
-    scheduler.add_job(job_timetable, 'cron', hour=5, jitter=120, id="job_timetable")
-    scheduler.add_job(jod_delete_older_record, 'cron', hour=1, jitter=120, id="jod_delete_older_record")
-    scheduler.add_job(job_update_info, 'cron', hour='6-23', minute="*", id="job_update_info")
+    scheduler.add_job(job_timetable, 'cron', hour=3, jitter=120, id="job_timetable")
+    scheduler.add_job(jod_delete_older_record, 'cron', hour=0, minute=30, jitter=120, id="jod_delete_older_record")
+    scheduler.add_job(job_update_info, 'cron', hour='4-23', minute="*", id="job_update_info")
     scheduler.add_listener(my_listener, EVENT_JOB_ERROR | EVENT_JOB_EXECUTED)
 
     keep_running = True
